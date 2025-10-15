@@ -3,7 +3,7 @@
   "description": "Сайт пожертвований на pandavyv.ru для адреса pandareborn.ton",
   "icon": "https://pandavyv.ru/icon.png",
   "redirect": {
-    "desktop": "https://pandavyv.ru",
-    "mobile": "https://pandavyv.ru"
+    "desktop": "https://pandavyv.onrender.com",
+    "mobile": "https://pandavyv.onrender.com"
   }
 }
