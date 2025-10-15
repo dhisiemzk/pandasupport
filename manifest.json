@@ -1,0 +1,9 @@
+{
+  "name": "Pandavyv Donations",
+  "description": "Сайт пожертвований на pandavyv.ru для адреса pandareborn.ton",
+  "icon": "https://pandavyv.ru/icon.png",
+  "redirect": {
+    "desktop": "https://pandavyv.ru",
+    "mobile": "https://pandavyv.ru"
+  }
+}

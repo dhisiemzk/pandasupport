@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pandavyv Donations</title>
+<script src="https://cdn.jsdelivr.net/npm/@tonconnect/sdk@0.7.4/dist/tonconnect-sdk.min.js"></script>
+<style>
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    text-align: center;
+    padding: 50px;
+}
+.donation-box {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 40px;
+    display: inline-block;
+    max-width: 450px;
+    transition: transform 0.2s;
+}
+.donation-box:hover { transform: scale(1.02); }
+.ton-address {
+    font-weight: bold;
+    font-size: 1.3em;
+    margin: 20px 0;
+    color: #0072ce;
+    cursor: pointer;
+}
+.buttons button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: #00bfff;
+    color: #fff;
+    transition: transform 0.1s, background-color 0.2s;
+}
+.buttons button:hover {
+    transform: scale(1.05);
+    background-color: #0095d1;
+}
+.buttons input[type="number"] {
+    width: 100px;
+    padding: 8px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin: 5px;
+}
+.comment-box {
+    margin-top: 15px;
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+#connectWallet {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: #ff8c00;
+    color: #fff;
+}
+#message {
+    margin-top: 15px;
+    color: green;
+    font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="donation-box">
+    <h1>Поддержите Pandavyv.ru!</h1>
+    <p>Ваши пожертвования помогают развивать проект и создавать новые возможности.</p>
+
+    <div class="ton-address" id="tonAddress" title="Нажмите, чтобы скопировать адрес">
+        Адрес для крипто-переводов: pandareborn.ton
+    </div>
+
+    <textarea id="comment" class="comment-box" placeholder="Комментарий к донату"></textarea>
+
+    <div class="buttons">
+        <button onclick="sendDonation(1)">1 TON</button>
+        <button onclick="sendDonation(5)">5 TON</button>
+        <button onclick="sendDonation(10)">10 TON</button>
+        <input type="number" id="customAmount" placeholder="Свою сумму">
+        <button onclick="sendCustomDonation()">Отправить свою сумму</button>
+    </div>
+
+    <button id="connectWallet">Подключить кошелёк</button>
+    <div id="message"></div>
+</div>
+
+<script>
+let tonConnect;
+let walletAddress = null;
+
+// Инициализация TON Connect
+async function initTONConnect() {
+    tonConnect = new TonConnect({
+        manifestUrl: "https://pandavyv.ru/manifest.json"
+    });
+
+    tonConnect.onStatusChange((wallet) => {
+        if(wallet) {
+            walletAddress = wallet.account.address;
+            document.getElementById('connectWallet').innerText = "Кошелёк подключен ✅";
+            console.log("Подключенный кошелек:", walletAddress);
+        } else {
+            walletAddress = null;
+            document.getElementById('connectWallet').innerText = "Подключить кошелёк";
+        }
+    });
+
+    document.getElementById('connectWallet').onclick = async () => {
+        try {
+            if(!walletAddress){
+                await tonConnect.connect();
+            }
+        } catch (e) {
+            alert("Ошибка подключения кошелька: " + e.message);
+            console.error(e);
+        }
+    };
+}
+
+// Копирование адреса TON
+document.getElementById('tonAddress').onclick = () => {
+    navigator.clipboard.writeText("pandareborn.ton").then(() => {
+        alert("TON-адрес скопирован!");
+    });
+}
+
+// Отправка фиксированной суммы
+async function sendDonation(amount) {
+    const comment = document.getElementById('comment').value.trim();
+    if(!walletAddress){
+        alert("Сначала подключите кошелёк!");
+        return;
+    }
+    if(amount <= 0){
+        alert("Введите корректную сумму!");
+        return;
+    }
+
+    try {
+        const tx = await tonConnect.sendTransaction({
+            validUntil: Math.floor(Date.now()/1000) + 600,
+            messages: [{
+                address: "pandareborn.ton",
+                amount: amount * 1_000_000_000,
+                payload: comment
+            }]
+        });
+        document.getElementById('message').innerText = `✅ Донат ${amount} TON отправлен!`;
+        document.getElementById('comment').value = "";
+        document.getElementById('customAmount').value = "";
+        console.log("Транзакция отправлена:", tx);
+    } catch(e) {
+        alert("Ошибка при отправке: " + e.message);
+        console.error(e);
+    }
+}
+
+// Отправка своей суммы
+function sendCustomDonation() {
+    const amount = parseFloat(document.getElementById('customAmount').value);
+    sendDonation(amount);
+}
+
+window.addEventListener('load', initTONConnect);
+</script>
+
+</body>
+</html>
